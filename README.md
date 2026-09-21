@@ -1,67 +1,99 @@
-# 🏋️ Gym & Fitness Portal
+# 🏋️ IronForge — Gym Management System
+### Full-Stack DBMS Project · Node.js + Express + MySQL
 
-A database management system developed using **MySQL** to manage the operations of a gym and fitness center.
+---
 
-## 📌 Project Overview
+## 📁 Project Structure
 
-The Gym & Fitness Portal is designed to efficiently manage gym-related information including members, trainers, membership plans, biometric records, workout schedules, diet plans, fitness progress, and payments.
+```
+gym-management/
+├── backend/
+│   ├── server.js          # Express API server
+│   └── db.js              # MySQL connection pool
+├── frontend/
+│   ├── index.html         # Single-page app
+│   ├── css/style.css      # Dark theme styles
+│   └── js/app.js          # Fetch + DOM logic
+├── schema.sql             # DB schema + seed data
+├── package.json
+└── README.md
+```
 
-The project demonstrates the practical implementation of Database Management System concepts using a relational database.
+---
 
-## 🛠️ Technologies Used
+## ⚡ Quick Start
 
-- MySQL
-- SQL
-- MySQL Workbench
+### Step 1 — Database Setup
+```bash
+# Login to MySQL and run the schema
+mysql -u root -p < schema.sql
+```
 
-## 🗄️ Database Modules
+Or manually in MySQL Workbench / CLI:
+```sql
+source /path/to/gym-management/schema.sql;
+```
 
-The database contains the following major entities:
+### Step 2 — Configure DB credentials
+Edit `backend/db.js`:
+```js
+const pool = mysql.createPool({
+  host:     'localhost',
+  user:     'root',        // ← your MySQL username
+  password: '',            // ← your MySQL password
+  database: 'gym_db',
+});
+```
 
-- Member
-- Trainer
-- MembershipPlan
-- Biometric
-- WorkoutSchedule
-- DietPlan
-- ProgressTracker
-- Payment
+### Step 3 — Install & Run
+```bash
+npm install
+npm start
+```
 
-## 🔑 DBMS Concepts Implemented
+### Step 4 — Open in Browser
+```
+http://localhost:3000
+```
 
-- ER Modeling
-- Relational Schema Design
-- Primary & Foreign Keys
-- Constraints
-- DML & DDL
-- Aggregate Functions
-- Set Operations
-- Subqueries
-- Joins
-- Views
-- Triggers
-- Cursors
-- Normalization
-  - 1NF
-  - 2NF
-  - 3NF
-  - BCNF
-  - 4NF
-  - 5NF
-- Transactions
-- ACID Properties
-- Concurrency Control
-- Row-Level Locking
-- Table-Level Locking
-- COMMIT / ROLLBACK / SAVEPOINT
+---
 
-## 📊 Database Structure
+## 🔌 API Endpoints
 
-The `Member` table acts as the central entity and is connected to trainers, membership plans, biometric records, workout schedules, diet plans, progress records, and payments.
+| Method | Endpoint          | Description         |
+|--------|-------------------|---------------------|
+| GET    | /api/dashboard    | Stats summary       |
+| GET    | /api/members      | All members         |
+| POST   | /api/members      | Add member          |
+| DELETE | /api/members/:id  | Delete member       |
+| GET    | /api/payments     | All payments        |
+| POST   | /api/payments     | Record payment      |
+| GET    | /api/workouts     | All workouts        |
+| POST   | /api/workouts     | Add workout         |
+| GET    | /api/dietplans    | All diet plans      |
+| POST   | /api/dietplans    | Add diet plan       |
+| GET    | /api/trainers     | All trainers        |
 
+---
 
+## 🗃️ Database Tables
 
+| Table       | Columns                                          |
+|-------------|--------------------------------------------------|
+| members     | id, name, email, phone, gender, plan, join_date  |
+| trainers    | id, name, specialty, experience, status          |
+| payments    | id, member_id→, amount, mode, pay_date, status   |
+| workouts    | id, member_id→, workout, frequency, difficulty   |
+| diet_plans  | id, member_id→, diet_type, calories, notes       |
 
-## 📚 Academic Project
+---
 
-This project was developed as a mini project for the Database Management Systems course.
+## ✨ Features
+- 📊 Live dashboard with animated stat counters
+- 👥 Member CRUD with avatar initials & badges
+- 💳 Payment tracking with mode & status badges
+- 🏃 Workout schedule with difficulty & trainer
+- 🥗 Diet plans with calorie targets
+- 🌑 Dark industrial theme with neon accents
+- 🔔 Toast notifications for all actions
+- ⚡ Error handling — no infinite loading states

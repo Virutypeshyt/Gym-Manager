@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IronForge — Gym Management</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">🏋️</div>
+        <div class="logo-text">
+          <div class="brand">IRONFORGE</div>
+          <div class="tagline">Gym Management</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" data-view="members" onclick="navigate('members')">
+        <span class="nav-icon">👥</span> Members
+      </div>
+      <div class="nav-item" data-view="payments" onclick="navigate('payments')">
+        <span class="nav-icon">💳</span> Payments
+      </div>
+
+      <div class="nav-section-label">Fitness</div>
+
+      <div class="nav-item" data-view="workouts" onclick="navigate('workouts')">
+        <span class="nav-icon">🏃</span> Workouts
+      </div>
+      <div class="nav-item" data-view="dietplans" onclick="navigate('dietplans')">
+        <span class="nav-icon">🥗</span> Diet Plans
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="gym-status">
+        <div class="status-dot"></div>
+        System Online
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <h1 class="page-title" id="page-title">Dashboard <span>Overview</span></h1>
+      <div class="topbar-right">
+        <div class="date-display" id="date-display"></div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD VIEW ── -->
+    <div id="view-dashboard" class="view active">
+      <div class="stats-grid">
+        <div class="stat-card c1">
+          <div class="stat-label">Total Members</div>
+          <div class="stat-value" id="stat-members">—</div>
+          <div class="stat-sub"><span class="trend-up">↑</span> Registered users</div>
+        </div>
+        <div class="stat-card c2">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value money" id="stat-revenue">—</div>
+          <div class="stat-sub"><span class="trend-up">↑</span> All time paid</div>
+        </div>
+        <div class="stat-card c3">
+          <div class="stat-label">Active Trainers</div>
+          <div class="stat-value" id="stat-trainers">—</div>
+          <div class="stat-sub">💪 On floor now</div>
+        </div>
+        <div class="stat-card c4">
+          <div class="stat-label">Revenue Today</div>
+          <div class="stat-value money" id="stat-today">—</div>
+          <div class="stat-sub">📅 Payments today</div>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Recent Payments -->
+        <div class="table-card">
+          <div class="section-header" style="padding:18px 18px 0">
+            <div class="section-title"><div class="dot"></div>Recent Payments</div>
+          </div>
+          <div id="recent-payments" style="margin-top:12px">
+            <div class="mini-list-item"><span class="spinner"></span> Loading...</div>
+          </div>
+        </div>
+
+        <!-- Plan Distribution CHART -->
+        <div class="table-card" style="padding:18px">
+          <div class="section-header" style="margin-bottom:16px">
+            <div class="section-title"><div class="dot"></div>Plan Distribution</div>
+          </div>
+          <canvas id="plan-chart" height="180"></canvas>
+          <div id="plan-breakdown"></div>
+        </div>
+      </div>
+
+      <!-- Active Trainers Section -->
+      <div class="section-header" style="margin-top:28px">
+        <div class="section-title"><div class="dot"></div>Active Trainers</div>
+        <span class="record-count" id="trainers-count">—</span>
+      </div>
+      <div class="table-card">
+        <div id="trainers-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0">
+          <div class="mini-list-item"><span class="spinner"></span> Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MEMBERS VIEW ── -->
+    <div id="view-members" class="view">
+      <div class="section-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="section-title"><div class="dot"></div>All Members</div>
+          <span class="record-count" id="members-count">—</span>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-member')">+ Add Member</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>Plan</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="members-tbody">
+              <tr class="loader-row"><td colspan="7"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAYMENTS VIEW ── -->
+    <div id="view-payments" class="view">
+      <div class="section-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="section-title"><div class="dot"></div>Payment Records</div>
+          <span class="record-count" id="payments-count">—</span>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-payment')">+ Add Payment</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Amount</th>
+                <th>Mode</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody">
+              <tr class="loader-row"><td colspan="5"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WORKOUTS VIEW ── -->
+    <div id="view-workouts" class="view">
+      <div class="section-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="section-title"><div class="dot"></div>Workout Schedule</div>
+          <span class="record-count" id="workouts-count">—</span>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-workout')">+ Add Workout</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Workout</th>
+                <th>Frequency</th>
+                <th>Difficulty</th>
+                <th>Trainer</th>
+              </tr>
+            </thead>
+            <tbody id="workouts-tbody">
+              <tr class="loader-row"><td colspan="5"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DIET PLANS VIEW ── -->
+    <div id="view-dietplans" class="view">
+      <div class="section-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="section-title"><div class="dot"></div>Diet Plans</div>
+          <span class="record-count" id="diet-count">—</span>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-diet')">+ Add Diet Plan</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Diet Type</th>
+                <th>Calories</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="diet-tbody">
+              <tr class="loader-row"><td colspan="4"><span class="spinner"></span>Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Add Member Modal -->
+<div id="modal-member" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-member')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">👥 Add New Member</span>
+      <button class="modal-close" onclick="closeModal('modal-member')">✕</button>
+    </div>
+    <form id="form-member" onsubmit="addMember(event)">
+      <div class="modal-body" style="grid-template-columns:1fr 1fr">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Full Name *</label>
+          <input id="m-name" type="text" placeholder="e.g. Arjun Sharma" required />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Email *</label>
+          <input id="m-email" type="email" placeholder="email@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input id="m-phone" type="text" placeholder="9876543210" />
+        </div>
+        <div class="form-group">
+          <label>Gender *</label>
+          <select id="m-gender" required>
+            <option value="">Select...</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Plan *</label>
+          <select id="m-plan" required>
+            <option value="">Select...</option>
+            <option value="Basic">Basic — ₹999</option>
+            <option value="Standard">Standard — ₹1999</option>
+            <option value="Premium">Premium — ₹2999</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Join Date *</label>
+          <input id="m-date" type="date" required />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" onclick="closeModal('modal-member')">Cancel</button>
+        <button type="submit" class="btn btn-primary">✅ Add Member</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Payment Modal -->
+<div id="modal-payment" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-payment')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">💳 Record Payment</span>
+      <button class="modal-close" onclick="closeModal('modal-payment')">✕</button>
+    </div>
+    <form id="form-payment" onsubmit="addPayment(event)">
+      <div class="modal-body" style="grid-template-columns:1fr 1fr">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Member *</label>
+          <select id="p-member" required>
+            <option value="">Loading members...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount (₹) *</label>
+          <input id="p-amount" type="number" placeholder="999" min="1" required />
+        </div>
+        <div class="form-group">
+          <label>Payment Mode *</label>
+          <select id="p-mode" required>
+            <option value="">Select...</option>
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="UPI">UPI</option>
+            <option value="Net Banking">Net Banking</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input id="p-date" type="date" required />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="p-status">
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Failed">Failed</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" onclick="closeModal('modal-payment')">Cancel</button>
+        <button type="submit" class="btn btn-primary">✅ Record Payment</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Workout Modal -->
+<div id="modal-workout" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-workout')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🏃 Add Workout</span>
+      <button class="modal-close" onclick="closeModal('modal-workout')">✕</button>
+    </div>
+    <form id="form-workout" onsubmit="addWorkout(event)">
+      <div class="modal-body" style="grid-template-columns:1fr 1fr">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Member *</label>
+          <select id="w-member" required>
+            <option value="">Loading members...</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Workout Name *</label>
+          <input id="w-name" type="text" placeholder="e.g. Powerlifting, HIIT" required />
+        </div>
+        <div class="form-group">
+          <label>Frequency *</label>
+          <select id="w-freq" required>
+            <option value="">Select...</option>
+            <option value="Daily">Daily</option>
+            <option value="5x/Week">5x/Week</option>
+            <option value="3x/Week">3x/Week</option>
+            <option value="Weekends">Weekends</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Difficulty *</label>
+          <select id="w-diff" required>
+            <option value="">Select...</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Trainer</label>
+          <select id="w-trainer">
+            <option value="">Loading trainers...</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" onclick="closeModal('modal-workout')">Cancel</button>
+        <button type="submit" class="btn btn-primary">✅ Add Workout</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Diet Plan Modal -->
+<div id="modal-diet" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-diet')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🥗 Add Diet Plan</span>
+      <button class="modal-close" onclick="closeModal('modal-diet')">✕</button>
+    </div>
+    <form id="form-diet" onsubmit="addDietPlan(event)">
+      <div class="modal-body" style="grid-template-columns:1fr 1fr">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Member *</label>
+          <select id="d-member" required>
+            <option value="">Loading members...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Diet Type *</label>
+          <select id="d-type" required>
+            <option value="">Select...</option>
+            <option value="Keto">Keto</option>
+            <option value="Vegan">Vegan</option>
+            <option value="High Protein">High Protein</option>
+            <option value="Balanced">Balanced</option>
+            <option value="Low Carb">Low Carb</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Daily Calories *</label>
+          <input id="d-cal" type="number" placeholder="e.g. 2000" min="500" max="6000" required />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Notes</label>
+          <input id="d-notes" type="text" placeholder="Optional dietary notes..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" onclick="closeModal('modal-diet')">Cancel</button>
+        <button type="submit" class="btn btn-primary">✅ Save Plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toast-container" class="toast-container"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
